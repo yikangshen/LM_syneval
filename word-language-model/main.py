@@ -34,6 +34,8 @@ parser.add_argument('--emsize', type=int, default=200,
                     help='size of word embeddings')
 parser.add_argument('--nhid', type=int, default=200,
                     help='number of hidden units per layer')
+parser.add_argument('--chunk_size', type=int, default=10,
+                    help='number of units per chunk')
 parser.add_argument('--nlayers', type=int, default=2,
                     help='number of layers')
 parser.add_argument('--lr', type=float, default=20,
@@ -48,6 +50,14 @@ parser.add_argument('--bptt', type=int, default=35,
                     help='sequence length')
 parser.add_argument('--dropout', type=float, default=0.2,
                     help='dropout applied to layers (0 = no dropout)')
+parser.add_argument('--dropouth', type=float, default=0.,
+                    help='dropout for rnn layers (0 = no dropout)')
+parser.add_argument('--dropouti', type=float, default=0.,
+                    help='dropout for input embedding layers (0 = no dropout)')
+parser.add_argument('--dropoute', type=float, default=0.,
+                    help='dropout to remove words from embedding layer (0 = no dropout)')
+parser.add_argument('--wdrop', type=float, default=0.,
+                    help='amount of weight dropout to apply to the RNN hidden to hidden matrix')
 parser.add_argument('--tied', action='store_true',
                     help='tie the word embedding and softmax weights')
 parser.add_argument('--seed', type=int, default=1111,
@@ -118,10 +128,12 @@ def batchify(data, bsz):
         data = data[0].narrow(0, 0, nbatch * bsz)
         # Evenly divide the data across the bsz batches.
         tag_data = tag_data.view(bsz, -1).t().contiguous()
-    else:
+    elif data is not None:
         nbatch = data.size(0) // bsz
         # Trim off any extra elements that wouldn't cleanly fit (remainders).
         data = data.narrow(0, 0, nbatch * bsz)
+    else:
+        return None
     
     # Evenly divide the data across the bsz batches.
     data = data.view(bsz, -1).t().contiguous()
@@ -158,7 +170,9 @@ else:
 
 if not args.test:
     ntokens = len(corpus.dictionary)
-    model = model.RNNModel(args.model, ntokens, args.emsize, args.nhid, args.nlayers, args.dropout, args.tied)
+    # model = model.RNNModel(args.model, ntokens, args.emsize, args.nhid, args.nlayers, args.dropout, args.tied)
+    model = model.RNNModel(args.model, ntokens, args.emsize, args.nhid, args.chunk_size, args.nlayers,
+                           args.dropout, args.dropouth, args.dropouti, args.dropoute, args.wdrop, args.tied)
     if args.cuda:
         if (not args.single) and (torch.cuda.device_count() > 1):
             # Scatters minibatches (in dim=1) across available GPUs
@@ -395,9 +409,12 @@ def train():
         hidden = model.init_hidden(args.batch_size)
     # UNCOMMENT FOR DEBUGGING
     #random.seed(10)
-    order = list(enumerate(range(0, train_lm_data.size(0) + train_ccg_data.size(0) - 1, args.bptt)))
+    if train_ccg_data is None:
+        order = list(range(0, train_lm_data.size(0) - 1, args.bptt))
+    else:
+        order = list(range(0, train_lm_data.size(0) + train_ccg_data.size(0) - 1, args.bptt))
     random.shuffle(order)
-    for batch, i in order:#enumerate(range(0, train_lm_data.size(0) + train_ccg_data.size(0) - 1, args.bptt)):
+    for batch, i in enumerate(order):#enumerate(range(0, train_lm_data.size(0) + train_ccg_data.size(0) - 1, args.bptt)):
         # TAG
         if i > train_lm_data.size(0):
             data, targets = get_batch(train_ccg_data, i - train_lm_data.size(0))
@@ -421,11 +438,11 @@ def train():
         total_loss += loss.item()#data
 
         if batch % args.log_interval == 0 and batch > 0:
-            cur_loss = total_loss[0] / args.log_interval
+            cur_loss = total_loss / args.log_interval
             elapsed = time.time() - start_time
             print('| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.2f} | ms/batch {:5.2f} | '
                     'loss {:5.2f} | ppl {:8.2f}'.format(
-                epoch, batch, len(train_lm_data)+len(train_ccg_data) // args.bptt, lr,
+                epoch, batch, len(order), lr,
                 elapsed * 1000 / args.log_interval, cur_loss, math.exp(cur_loss)))
             total_loss = 0
             start_time = time.time()
