@@ -50,9 +50,9 @@ parser.add_argument('--bptt', type=int, default=35,
                     help='sequence length')
 parser.add_argument('--dropout', type=float, default=0.2,
                     help='dropout applied to layers (0 = no dropout)')
-parser.add_argument('--dropouth', type=float, default=0.,
+parser.add_argument('--dropouth', type=float, default=0.2,
                     help='dropout for rnn layers (0 = no dropout)')
-parser.add_argument('--dropouti', type=float, default=0.,
+parser.add_argument('--dropouti', type=float, default=0.2,
                     help='dropout for input embedding layers (0 = no dropout)')
 parser.add_argument('--dropoute', type=float, default=0.,
                     help='dropout to remove words from embedding layer (0 = no dropout)')
