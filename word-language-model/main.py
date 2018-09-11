@@ -309,11 +309,11 @@ def test_get_batch(source, evaluation=False):
 def get_batch(source, i, evaluation=False):
     if isinstance(source, tuple):
         seq_len = min(args.bptt, len(source[0]) - 1 - i)
-        data = Variable(source[0][i:i+seq_len], volatile=evaluation)
+        data = Variable(source[0][i:i+seq_len])
         target = Variable(source[1][i:i+seq_len].view(-1))
     else:
         seq_len = min(args.bptt, len(source) - 1 - i)
-        data = Variable(source[i:i+seq_len], volatile=evaluation)
+        data = Variable(source[i:i+seq_len])
         target = Variable(source[i+1:i+1+seq_len].view(-1))
     #This is where data should be CUDA-fied to lessen OOM errors
     if args.cuda:
@@ -381,7 +381,13 @@ def evaluate(lm_data_source, ccg_data_source):
         hidden = model.module.init_hidden(eval_batch_size)
     else:
         hidden = model.init_hidden(eval_batch_size)
-    for i in range(0, lm_data_source.size(0) + ccg_data_source.size(0) - 1, args.bptt):
+
+    if ccg_data_source is None:
+        order = range(0, lm_data_source.size(0) - 1, args.bptt)
+    else:
+        order = range(0, lm_data_source.size(0) + ccg_data_source.size(0) - 1, args.bptt)
+    for i in order:
+        # if i > 1000: break
         # TAG
         if i > lm_data_source.size(0):
             data, targets = get_batch(ccg_data_source, i - lm_data_source.size(0), evaluation=True)
@@ -391,9 +397,14 @@ def evaluate(lm_data_source, ccg_data_source):
         output, hidden = model(data, hidden)
         output_flat = output.view(-1, ntokens)
         curr_loss = len(data) * criterion(output_flat, targets).data
-        total_loss += curr_loss
+        total_loss += curr_loss.item()
         hidden = repackage_hidden(hidden)
-    return total_loss[0] / (len(lm_data_source)+len(ccg_data_source))
+
+    if ccg_data_source is None:
+        length = len(lm_data_source)
+    else:
+        length = len(lm_data_source)+len(ccg_data_source)
+    return total_loss / length
 
 
 def train():
@@ -415,6 +426,7 @@ def train():
         order = list(range(0, train_lm_data.size(0) + train_ccg_data.size(0) - 1, args.bptt))
     random.shuffle(order)
     for batch, i in enumerate(order):#enumerate(range(0, train_lm_data.size(0) + train_ccg_data.size(0) - 1, args.bptt)):
+        # if batch >= 1000: break
         # TAG
         if i > train_lm_data.size(0):
             data, targets = get_batch(train_ccg_data, i - train_lm_data.size(0))
