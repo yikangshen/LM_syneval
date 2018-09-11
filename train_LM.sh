@@ -1,11 +1,11 @@
 #!/bin/bash
 source ./hyperparameters.txt
 
-python $lm_dir/main.py \
+python -u $lm_dir/main.py \
     --lm_data $lm_data_dir \
     --cuda \
     --epochs $epochs \
-    --model $LSTM \
+    --model $model \
     --nhid $num_hid \
     --save $model_dir/lstm_lm.pt \
     --save_lm_data $model_dir/lstm_lm.bin \
