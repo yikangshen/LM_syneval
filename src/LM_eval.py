@@ -12,13 +12,13 @@ logging.basicConfig(level=logging.INFO)
 
 parser = argparse.ArgumentParser(description="Parameters for testing a language model")
 
-parser.add_argument('--template_dir', type=str, default='../EMNLP2018/templates',
+parser.add_argument('--template_dir', type=str, default='./templates',
                     help='Location of the template files')
 parser.add_argument('--output_file', type=str, default='all_test_sents.txt',
                     help='File to store all of the sentences that will be tested')
-parser.add_argument('--model', type=str, default='../models/model.pt',
+parser.add_argument('--model', type=str, default='./models/lstm_lm.pt',
                     help='The model to test')
-parser.add_argument('--lm_data', type=str, default='../models/model.bin',
+parser.add_argument('--lm_data', type=str, default='./models/lstm_lm.bin',
                     help='The model .bin file that accompanies the model (for faster loading)')
 parser.add_argument('--tests', type=str, default='all',
                     help='Which constructions to test (agrmt/npi/all)')
@@ -61,7 +61,7 @@ def test_LM():
             results = score_ngram()
     else:       
         logging.info("Testing RNN...")
-        os.system('../example_scripts/test.sh '+ args.template_dir + ' ' +  args.model + ' ' + args.lm_data + ' ' + args.output_file + ' > '+ 'rnn.output')
+        os.system('./example_scripts/test.sh '+ args.template_dir + ' ' +  args.model + ' ' + args.lm_data + ' ' + args.output_file + ' > '+ 'rnn.output')
         results = score_rnn()
     with open(args.model_type+"_results.pickle", 'wb') as f:
         pickle.dump(results, f)

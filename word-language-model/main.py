@@ -66,11 +66,11 @@ parser.add_argument('--cuda', action='store_true',
                     help='use CUDA')
 parser.add_argument('--log-interval', type=int, default=200, metavar='N',
                     help='report interval')
-parser.add_argument('--save', type=str,  default='model.pt',
+parser.add_argument('--save', type=str,  default='../models/model.pt',
                     help='path to save the final model')
 parser.add_argument('--single', action='store_true',
                     help='use only a single GPU (even if more are available)')
-parser.add_argument('--save_lm_data', type=str, default='lm_data.bin',
+parser.add_argument('--save_lm_data', type=str, default='../models/model.bin',
                     help='path to save the LM data')
 parser.add_argument('--test', action='store_true',
                     help='test a trained LM')
@@ -293,12 +293,12 @@ def repackage_hidden(h):
 def test_get_batch(source, evaluation=False):
     if isinstance(source, tuple):
         seq_len = len(source[0]) - 1
-        data = Variable(source[0][:seq_len], volatile=evaluation)
-        target = Variable(source[1][:seq_len], volatile=evaluation)
+        data = Variable(source[0][:seq_len])
+        target = Variable(source[1][:seq_len])
         
     else:
         seq_len = len(source) - 1
-        data = Variable(source[:seq_len], volatile=evaluation)
+        data = Variable(source[:seq_len])
         target = Variable(source[1:1+seq_len].view(-1))
     # This is where data should be CUDA-fied to lessen OOM errors
     if args.cuda:

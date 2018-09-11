@@ -20,7 +20,7 @@ parser.add_argument('--tests', type=str, default='all',
                     help='Which constructions to test (agrmt/npi/all)')
 parser.add_argument('--anim', action='store_true', default=False,
                     help='Examine the effect of animacy on the results')
-parser.add_argument('--out_dir', type=str, default='../results',
+parser.add_argument('--out_dir', type=str, default='./results',
                     help='Directory to store the results files')
 parser.add_argument('--mode', type=str, default='overall',
                     help='Level of detail to report (overall/condensed/full)')

@@ -1,8 +1,8 @@
 #!/bin/bash
-
-source ../hyperparameters.txt
+source ./hyperparameters.txt
 
 python $lm_dir/main.py \
+    --single \
     --test \
     --lm_data $1 \
     --cuda \

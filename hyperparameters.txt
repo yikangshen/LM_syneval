@@ -4,7 +4,7 @@
 #######################################################
 
 # Main working directory
-workdir=/path/to/this/repo
+workdir=/home/hmwv1114/workdisk/workspace/LM_syneval_OrderedNeurons
 
 # Directory where the Pytorch word language model code lives (with modifications for the multitask LMs)
 lm_dir=$workdir/word-language-model
