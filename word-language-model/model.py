@@ -23,7 +23,7 @@ class RNNModel(nn.Module):
             dropconnect=wdrop,
             dropout=dropouth
         )
-        self.decoder = nn.Linear(nhid, ntoken)
+        self.decoder = nn.Linear(ninp, ntoken)
 
         # Optionally tie weights as in:
         # "Using the Output Embedding to Improve Language Models" (Press & Wolf 2016)

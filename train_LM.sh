@@ -6,7 +6,9 @@ python -u $lm_dir/main.py \
     --cuda \
     --epochs $epochs \
     --model $model \
+    --nlayers $nlayers \
     --nhid $num_hid \
+    --emsize $emsize \
     --save $model_dir/lstm_lm.pt \
     --save_lm_data $model_dir/lstm_lm.bin \
     --log-interval $log_freq \
@@ -15,3 +17,4 @@ python -u $lm_dir/main.py \
     --dropouth $dropout \
     --dropouti $dropout \
     --lr $lr
+    --tied
