@@ -16,5 +16,5 @@ python -u $lm_dir/main.py \
     --dropout $dropout \
     --dropouth $dropout \
     --dropouti $dropout \
-    --lr $lr
+    --lr $lr \
     --tied
